@@ -4,6 +4,7 @@ import math
 import torch
 import numpy as np
 import torch.optim as optim
+from torch.optim.lr_scheduler import ReduceLROnPlateau 
 from typing import List, Optional, Tuple, Any, Dict
 from torch import nn
 from scipy.special import softmax
@@ -154,6 +155,7 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
         criterion = nn.CrossEntropyLoss() # Set the criterion to Cross Entropy Loss
     parameters = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = optim.Adam(parameters, lr=config.train['lr'])
+    scheduler = ReduceLROnPlateau(optimizer)
     model.to(device) # Move the model to device
 
     batch_size = config.train['batch_size']
@@ -198,6 +200,8 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
                 # Track loss and logits
                 running_loss_test.append(loss.item())
                 all_logits_test.append(logits.detach().cpu().numpy())
+
+        scheduler.step(loss)
 
         print_report(epoch, running_loss, all_logits, y=y_train, name='Train')
         print_report(epoch, running_loss_test, all_logits_test, y=y_test, name='Test')
