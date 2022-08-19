@@ -171,6 +171,9 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
     y_train = [x[2] for x in train_data]
 
     winner_report: Dict = {}
+    training_loss = {}
+    validation_loss = {}
+    
     for epoch in range(nepochs):
         running_loss = []
         all_logits = []
@@ -196,13 +199,16 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
             for i in range(num_batches_test):
                 x, cpos, y = create_batch_piped_data(test_data, i*batch_size_eval, (i+1)*batch_size_eval, device=device, pad_id=pad_id)
                 logits = model(x, cpos, ignore_cpos=ignore_cpos)
-#                 loss = criterion(logits, y)
+                loss = criterion(logits, y)
 
                 # Track loss and logits
                 running_loss_test.append(loss.item())
                 all_logits_test.append(logits.detach().cpu().numpy())
 
         scheduler.step(loss)
+        
+        training_loss[epoch] = sum(running_loss)/len(running_loss)
+        validation_loss[epoch] = sum(running_loss_test)/len(running_loss_test)
 
         print_report(epoch, running_loss, all_logits, y=y_train, name='Train')
         print_report(epoch, running_loss_test, all_logits_test, y=y_test, name='Test')
@@ -226,7 +232,7 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
                     print("\n##### Model saved to {} at epoch: {} and {}/{}: {} #####\n".format(path, epoch, config.train['metric']['base'],
                           config.train['metric']['score'], winner_report['report'][config.train['metric']['base']][config.train['metric']['score']]))
     
-    return (running_loss, running_loss_test, winner_report)
+    return (training_loss, validation_loss, winner_report)
 
 
 def eval_model(model: nn.Module, data: List, config: ConfigMetaCAT, tokenizer: TokenizerWrapperBase) -> Dict:
