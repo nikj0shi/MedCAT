@@ -225,10 +225,8 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
                     torch.save(model.state_dict(), path)
                     print("\n##### Model saved to {} at epoch: {} and {}/{}: {} #####\n".format(path, epoch, config.train['metric']['base'],
                           config.train['metric']['score'], winner_report['report'][config.train['metric']['base']][config.train['metric']['score']]))
-
-    return winner_report
-    print(running_loss)
-    print(running_loss_test)
+    
+    return (running_loss, running_loss_test, winner_report)
 
 
 def eval_model(model: nn.Module, data: List, config: ConfigMetaCAT, tokenizer: TokenizerWrapperBase) -> Dict:
