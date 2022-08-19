@@ -196,7 +196,7 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
             for i in range(num_batches_test):
                 x, cpos, y = create_batch_piped_data(test_data, i*batch_size_eval, (i+1)*batch_size_eval, device=device, pad_id=pad_id)
                 logits = model(x, cpos, ignore_cpos=ignore_cpos)
-                loss = criterion(logits, y)
+#                 loss = criterion(logits, y)
 
                 # Track loss and logits
                 running_loss_test.append(loss.item())
@@ -227,6 +227,8 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
                           config.train['metric']['score'], winner_report['report'][config.train['metric']['base']][config.train['metric']['score']]))
 
     return winner_report
+    print(running_loss)
+    print(running_loss_test)
 
 
 def eval_model(model: nn.Module, data: List, config: ConfigMetaCAT, tokenizer: TokenizerWrapperBase) -> Dict:
