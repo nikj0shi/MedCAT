@@ -5,7 +5,7 @@ with open("./README.md", "r") as fh:
 
 
 setuptools.setup(
-    name="medcat_test",
+    name="medcat",
     setup_requires=["setuptools_scm"],
     use_scm_version={"local_scheme": "no-local-version", "fallback_version": "unknown"},
     author="w-is-h",
