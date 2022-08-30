@@ -131,7 +131,7 @@ class MetaCAT(PipeRunner):
                 os.makedirs(save_dir_path, exist_ok=True)
 
         # Prepare the data
-        assert self.tokenizer is not None
+#         assert self.tokenizer is not None
 #         train_data = prepare_from_json(train_data, g_config['cntx_left'], g_config['cntx_right'], self.tokenizer,
 #                                  cui_filter=t_config['cui_filter'],
 #                                  replace_center=g_config['replace_center'], prerequisites=t_config['prerequisites'],
@@ -156,7 +156,7 @@ class MetaCAT(PipeRunner):
         if not category_value2id:
             # Encode the category values
             train_data, category_value2id = encode_category_values(train_data)
-            test_data, blah = encode_category_values(test_data)
+            test_data, category_value2id = encode_category_values(test_data)
             
             g_config['category_value2id'] = category_value2id
         else:
