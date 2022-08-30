@@ -90,10 +90,9 @@ class MetaCAT(PipeRunner):
         hasher.update(self.config.get_hash())
         return hasher.hexdigest()
 
-    def train(self, json_path: Union[str, list], save_dir_path: Optional[str] = None) -> Dict:
+    def train(self, train_data: Dict, test_data: Dict, save_dir_path: Optional[str] = None) -> Dict:
         r""" Train or continue training a model give a json_path containing a MedCATtrainer export. It will
         continue training if an existing model is loaded or start new training if the model is blank/new.
-
         Args:
             json_path (`str` or `list`):
                 Path/Paths to a MedCATtrainer export containing the meta_annotations we want to train for.
@@ -104,25 +103,25 @@ class MetaCAT(PipeRunner):
         g_config = self.config.general
         t_config = self.config.train
 
-        # Load the medcattrainer export
-        if isinstance(json_path, str):
-            json_path = [json_path]
+#         # Load the medcattrainer export
+#         if isinstance(json_path, str):
+#             json_path = [json_path]
 
-        def merge_data_loaded(base, other):
-            if not base:
-                return other
-            elif other is None:
-                return base
-            else:
-                for p in other['projects']:
-                    base['projects'].append(p)
-            return base
+#         def merge_data_loaded(base, other):
+#             if not base:
+#                 return other
+#             elif other is None:
+#                 return base
+#             else:
+#                 for p in other['projects']:
+#                     base['projects'].append(p)
+#             return base
 
-        # Merge data from all different data paths
-        data_loaded: Dict = {}
-        for path in json_path:
-            with open(path, 'r') as f:
-                data_loaded = merge_data_loaded(data_loaded, json.load(f))
+#         # Merge data from all different data paths
+#         data_loaded: Dict = {}
+#         for path in json_path:
+#             with open(path, 'r') as f:
+#                 data_loaded = merge_data_loaded(data_loaded, json.load(f))
 
         # Create directories if they don't exist
         if t_config['auto_save_model']:
@@ -133,28 +132,37 @@ class MetaCAT(PipeRunner):
 
         # Prepare the data
         assert self.tokenizer is not None
-        data = prepare_from_json(data_loaded, g_config['cntx_left'], g_config['cntx_right'], self.tokenizer,
+        train_data = prepare_from_json(train_data, g_config['cntx_left'], g_config['cntx_right'], self.tokenizer,
+                                 cui_filter=t_config['cui_filter'],
+                                 replace_center=g_config['replace_center'], prerequisites=t_config['prerequisites'],
+                                 lowercase=g_config['lowercase'])
+        
+        test_data = prepare_from_json(test_data, g_config['cntx_left'], g_config['cntx_right'], self.tokenizer,
                                  cui_filter=t_config['cui_filter'],
                                  replace_center=g_config['replace_center'], prerequisites=t_config['prerequisites'],
                                  lowercase=g_config['lowercase'])
 
         # Check is the name there
         category_name = g_config['category_name']
-        if category_name not in data:
+        if category_name not in train_data:
             raise Exception(
                 "The category name does not exist in this json file. You've provided '{}', while the possible options are: {}".format(
                     category_name, " | ".join(list(data.keys()))))
 
-        data = data[category_name]
+        train_data = data[category_name]
+        test_data = test_data[category_name]
 
         category_value2id = g_config['category_value2id']
         if not category_value2id:
             # Encode the category values
-            data, category_value2id = encode_category_values(data)
+            train_data, category_value2id = encode_category_values(train_data)
+            test_data, blah = encode_category_values(test_data)
+            
             g_config['category_value2id'] = category_value2id
         else:
             # We already have everything, just get the data
-            data, _ = encode_category_values(data, existing_category_value2id=category_value2id)
+            train_data, _ = encode_category_values(train_data, existing_category_value2id=category_value2id)
+            test_data, _ = encode_category_values(test_data, existing_category_value2id=category_value2id)
 
         # Make sure the config number of classes is the same as the one found in the data
         if len(category_value2id) != self.config.model['nclasses']:
@@ -165,7 +173,7 @@ class MetaCAT(PipeRunner):
             self.config.model['nclasses'] = len(category_value2id)
             self.model = self.get_model(embeddings=self.embeddings)
 
-        report = train_model(self.model, data=data, config=self.config, save_dir_path=save_dir_path)
+        report = train_model(self.model, train_data=train_data, test_data=test_data, config=self.config, save_dir_path=save_dir_path)
 
         # If autosave, then load the best model here
         if t_config['auto_save_model']:
