@@ -132,15 +132,15 @@ class MetaCAT(PipeRunner):
 
         # Prepare the data
         assert self.tokenizer is not None
-        train_data = prepare_from_json(train_data, g_config['cntx_left'], g_config['cntx_right'], self.tokenizer,
-                                 cui_filter=t_config['cui_filter'],
-                                 replace_center=g_config['replace_center'], prerequisites=t_config['prerequisites'],
-                                 lowercase=g_config['lowercase'])
+#         train_data = prepare_from_json(train_data, g_config['cntx_left'], g_config['cntx_right'], self.tokenizer,
+#                                  cui_filter=t_config['cui_filter'],
+#                                  replace_center=g_config['replace_center'], prerequisites=t_config['prerequisites'],
+#                                  lowercase=g_config['lowercase'])
         
-        test_data = prepare_from_json(test_data, g_config['cntx_left'], g_config['cntx_right'], self.tokenizer,
-                                 cui_filter=t_config['cui_filter'],
-                                 replace_center=g_config['replace_center'], prerequisites=t_config['prerequisites'],
-                                 lowercase=g_config['lowercase'])
+#         test_data = prepare_from_json(test_data, g_config['cntx_left'], g_config['cntx_right'], self.tokenizer,
+#                                  cui_filter=t_config['cui_filter'],
+#                                  replace_center=g_config['replace_center'], prerequisites=t_config['prerequisites'],
+#                                  lowercase=g_config['lowercase'])
 
         # Check is the name there
         category_name = g_config['category_name']
