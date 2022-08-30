@@ -149,7 +149,7 @@ class MetaCAT(PipeRunner):
                 "The category name does not exist in this json file. You've provided '{}', while the possible options are: {}".format(
                     category_name, " | ".join(list(data.keys()))))
 
-        train_data = data[category_name]
+        train_data = train_data[category_name]
         test_data = test_data[category_name]
 
         category_value2id = g_config['category_value2id']
