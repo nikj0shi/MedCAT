@@ -128,10 +128,10 @@ def encode_category_values(data: Dict, existing_category_value2id: Optional[Dict
     else:
         category_value2id = {}
 
-    category_values = set([x[2] for x in data])
-    for c in category_values:
-        if c not in category_value2id:
-            category_value2id[c] = len(category_value2id)
+#     category_values = set([x[2] for x in data])
+#     for c in category_values:
+#         if c not in category_value2id:
+#             category_value2id[c] = len(category_value2id)
 
     # Map values to numbers
     for i in range(len(data)):
