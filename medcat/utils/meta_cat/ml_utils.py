@@ -135,7 +135,7 @@ def print_report(epoch: int, running_loss: List, all_logits: List, y: Any, name:
         print(classification_report(y, np.argmax(np.concatenate(all_logits, axis=0), axis=1)))
 
 
-def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_path: Optional[str] = None) -> Dict:
+def train_model(model: nn.Module, train_data: List, test_data: List, config: ConfigMetaCAT, save_dir_path: Optional[str] = None) -> Dict:
     r''' Trains a LSTM model (for now) with autocheckpoints
 
     Args:
@@ -144,7 +144,7 @@ def train_model(model: nn.Module, data: List, config: ConfigMetaCAT, save_dir_pa
         save_dir_path
     '''
     # Get train/test from data
-    train_data, test_data = split_list_train_test(data, test_size=config.train['test_size'], shuffle=config.train['shuffle_data'])
+#     train_data, test_data = split_list_train_test(data, test_size=config.train['test_size'], shuffle=config.train['shuffle_data'])
     device = torch.device(config.general['device']) # Create a torch device
 
     class_weights = config.train['class_weights']
